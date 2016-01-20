@@ -16,12 +16,32 @@
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
 
-var width = 960,
-    height = 500,
-    radius = Math.min(width, height) / 2;
+var values = [
+{
+ "label": "contig_45487",
+ "frequency": 25,
+ "colour": "#2484c1"
+}, {
+ "label": "contig_45487",
+ "frequency": 50,
+ "colour": "#0c6197"
+}, {
+ "label": "contig_45487",
+ "frequency": 100,
+ "colour": "#4daa4b"
+}, {
+ "label": "contig_45487",
+ "frequency": 200,
+ "colour": "#90c469"
+}, {
+ "label": "contig_45487",
+ "frequency": 400,
+ "colour": "#daca61"
+}];
 
-var color = d3.scale.ordinal()
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+var width = 500,
+    height = 500,
+    radius = Math.min(width, height) / 5;
 
 var arc = d3.svg.arc()
     .outerRadius(radius - 10)
@@ -33,7 +53,7 @@ var labelArc = d3.svg.arc()
 
 var pie = d3.layout.pie()
     .sort(null)
-    .value(function(d) { return d.population; });
+    .value(function(d) { return d.frequency; });
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
@@ -41,26 +61,30 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-d3.csv("data.csv", type, function(error, data) {
-  if (error) throw error;
-
   var g = svg.selectAll(".arc")
-      .data(pie(data))
+      .data(pie(values))
     .enter().append("g")
       .attr("class", "arc");
 
   g.append("path")
       .attr("d", arc)
-      .style("fill", function(d) { return color(d.data.age); });
+      .style("fill", function(d) { return d.data.colour; })
+      .on("mouseover", function(d) {
+        d3.select(this).transition()
+          .style("opacity", 0.7)
+      })
+      .on("mouseout", function(d) {
+        d3.select(this).transition()
+          .style("opacity", 1)
+      });
 
-  g.append("text")
-      .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
-      .attr("dy", ".35em")
-      .text(function(d) { return d.data.age; });
-});
+  // g.append("text")
+  //     .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
+  //     .attr("dy", ".35em")
+  //     .text(function(d) { return d.data.label; });
 
 function type(d) {
-  d.population = +d.population;
+  d.frequency = +d.frequency;
   return d;
 }
 
