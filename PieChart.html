@@ -1,106 +1,120 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Bash Command Visualization</title>
 
-.arc text {
-  font: 8px arial;
-  text-anchor: middle;
-}
+    <style type="text/css">
+      * { margin: 0; padding: 0; }
 
-.arc path {
-  stroke: #fff;
-}
+      #chart {
+        background-color: white;
+        font: 14px sans-serif;
+        margin: 0 auto 50px;
+        width: 600px;
+        height: 600px;
+      }
+        #chart .label{
+          fill: #404040;
+          font-size: 12px;
+        }
+    </style>
+  </head>
 
-</style>
-<body>
+  <body>
+    <div id="chart"></div>
+  </body>
 <script src="//d3js.org/d3.v3.min.js"></script>
-<script>
+<script type="text/javascript">
 
 var values = [
 {
  "label": "100-200",
- "frequency": 25,
+ "count": 25,
  "colour": "#2484c1"
 }, {
  "label": "200-300",
- "frequency": 50,
+ "count": 50,
  "colour": "#0c6197"
 }, {
  "label": "300-400",
- "frequency": 100,
+ "count": 100,
  "colour": "#4daa4b"
 }, {
  "label": "400-500",
- "frequency": 200,
+ "count": 200,
  "colour": "#90c469"
 }, {
  "label": "600-700",
- "frequency": 400,
+ "count": 400,
  "colour": "#daca61"
 }];
 
-var width = 500,
-    height = 500,
-    radius = Math.min(width, height) / 5;
-
-var arc = d3.svg.arc()
-    .outerRadius(radius - 10)
-    .innerRadius(0);
-
-var labelArc = d3.svg.arc()
-    .outerRadius(radius - 40)
-    .innerRadius(radius - 40);
+var width  = 500;
+    height = 500;
+    radius = width / 2.5;
 
 var pie = d3.layout.pie()
-    .sort(null)
-    .value(function(d) { return d.frequency; });
+            .value(function(d) { return d.count; })
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height)
+var piedata = pie(values);
+
+var color = d3.scale.category20();
+
+var arc = d3.svg.arc()
+  .innerRadius(0)
+  .outerRadius(radius - 7);
+
+// Create svg element
+var svg = d3.select("#chart").append("svg")
+  .attr("width", width)
+  .attr("height", height)
   .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-var g = svg.selectAll(".arc")
-    .data(pie(values))
-  .enter().append("g")
-    .attr("class", "arc");
-
-  g.append("path")
-      .attr("d", arc)
-      .style("fill", function(d) { return d.data.colour; })
-      .on("mouseover", function(d) {
-        d3.select(this).transition()
-          .style("opacity", 0.7)
-      })
-      .on("mouseout", function(d) {
-        d3.select(this).transition()
-          .style("opacity", 1)
-      });
-
-   g.append("text")
-       .attr("transform", function(d) {
-        var dist = radius + 20;
-            angle = (d.startAngle + d.endAngle) / 2;
-            x = dist * Math.sin(angle);
-            y = -dist * Math.cos(angle);
-            return "translate(" + x + "," + y + ")";
-       })
-       .attr("dy", ".35em")
-       .text(function(d) { return d.data.label; });
-
+// Tick marks
 var ticks = svg.selectAll("line")
-                  .data(values)
-                  .enter()
-                  .append("line");
+              .data(piedata)
+              .enter()
+              .append("line");
 
-  ticks.attr("x1", 0)
-       .attr("x2", 0)
-       .attr("y1", -radius+4)
-       .attr("y2", -radius-2)
-       .attr("stroke", "gray")
-       .attr("transform", function(d) {
-         return "rotate(" + (d.startAngle+d.endAngle)/2 * (180/Math.PI) + ")";
-       });
+ticks.attr("x1", 0)
+  .attr("x2", 0)
+  .attr("y1", -radius+4)
+  .attr("y2", -radius-2)
+  .attr("stroke", "gray")
+  .attr("transform", function(d) {
+   return "rotate(" + (d.startAngle+d.endAngle)/2 * (180/Math.PI) + ")";
+  });
 
-</script>
+// Labels
+var labels = svg.selectAll("text")
+  .data(piedata)
+  .enter()
+  .append("text");
+
+labels.attr("class", "label")
+  .attr("transform", function(d) {
+     var dist = radius + 25;
+         angle = (d.startAngle + d.endAngle) / 2; // Middle of wedge
+         x = dist * Math.sin(angle);
+         y = -dist * Math.cos(angle);
+     return "translate(" + x + "," + y + ")";
+   })
+  .attr("dy", "0.35em")
+  .attr("text-anchor", "middle")
+  .text(function(d){
+    return d.data.label;
+  });
+
+
+// Piechart
+var path = svg.selectAll("path")
+  .data(piedata)
+  .enter()
+  .append("path")
+  .attr("fill", function(d) { return d.data.colour; })
+  .attr("d", arc);
+
+  </script>
+</html>
