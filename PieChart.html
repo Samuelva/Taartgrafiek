@@ -5,19 +5,17 @@
     <title>Bash Command Visualization</title>
 
     <style type="text/css">
-      * { margin: 0; padding: 0; }
-
-      #chart {
-        background-color: white;
-        font: 14px sans-serif;
-        margin: 0 auto 50px;
-        width: 600px;
-        height: 600px;
-      }
-        #chart .label{
+      #chart .label{
           fill: #404040;
           font-size: 12px;
-        }
+      }
+      
+      .legend rect {
+        fill:white;
+        stroke:black;
+        opacity:0.8;
+      }
+
     </style>
   </head>
 
@@ -25,6 +23,7 @@
     <div id="chart"></div>
   </body>
 <script src="//d3js.org/d3.v3.min.js"></script>
+<script src="d3.legend.js"></script>
 <script type="text/javascript">
 
 var values = [
@@ -50,12 +49,13 @@ var values = [
  "colour": "#daca61"
 }];
 
-var width  = 500;
-    height = 500;
+var width  = 300;
+    height = 300;
     radius = width / 2.5;
 
 var pie = d3.layout.pie()
-            .value(function(d) { return d.count; })
+  .sort(null)
+  .value(function(d) { return d.count; })
 
 var piedata = pie(values);
 
@@ -65,6 +65,8 @@ var arc = d3.svg.arc()
   .innerRadius(0)
   .outerRadius(radius - 7);
 
+
+
 // Create svg element
 var svg = d3.select("#chart").append("svg")
   .attr("width", width)
@@ -73,40 +75,39 @@ var svg = d3.select("#chart").append("svg")
   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
 // Tick marks
-var ticks = svg.selectAll("line")
-              .data(piedata)
-              .enter()
-              .append("line");
+// var ticks = svg.selectAll("line")
+//               .data(piedata)
+//               .enter()
+//               .append("line");
 
-ticks.attr("x1", 0)
-  .attr("x2", 0)
-  .attr("y1", -radius+4)
-  .attr("y2", -radius-2)
-  .attr("stroke", "gray")
-  .attr("transform", function(d) {
-   return "rotate(" + (d.startAngle+d.endAngle)/2 * (180/Math.PI) + ")";
-  });
+// ticks.attr("x1", 0)
+//   .attr("x2", 0)
+//   .attr("y1", -radius+4)
+//   .attr("y2", -radius-2)
+//   .attr("stroke", "gray")
+//   .attr("transform", function(d) {
+//    return "rotate(" + (d.startAngle+d.endAngle)/2 * (180/Math.PI) + ")";
+//   });
 
 // Labels
-var labels = svg.selectAll("text")
-  .data(piedata)
-  .enter()
-  .append("text");
+// var labels = svg.selectAll("text")
+//   .data(piedata)
+//   .enter()
+//   .append("text");
 
-labels.attr("class", "label")
-  .attr("transform", function(d) {
-     var dist = radius + 25;
-         angle = (d.startAngle + d.endAngle) / 2; // Middle of wedge
-         x = dist * Math.sin(angle);
-         y = -dist * Math.cos(angle);
-     return "translate(" + x + "," + y + ")";
-   })
-  .attr("dy", "0.35em")
-  .attr("text-anchor", "middle")
-  .text(function(d){
-    return d.data.label;
-  });
-
+// labels.attr("class", "label")
+//   .attr("transform", function(d) {
+//      var dist = radius + 25;
+//          angle = (d.startAngle + d.endAngle) / 2; // Middle of wedge
+//          x = dist * Math.sin(angle);
+//          y = -dist * Math.cos(angle);
+//      return "translate(" + x + "," + y + ")";
+//    })
+//   .attr("dy", "0.35em")
+//   .attr("text-anchor", "middle")
+//   .text(function(d){
+//     return d.data.label;
+//   });
 
 // Piechart
 var path = svg.selectAll("path")
@@ -114,7 +115,14 @@ var path = svg.selectAll("path")
   .enter()
   .append("path")
   .attr("fill", function(d) { return d.data.colour; })
+  .attr("data-legend", function(d) { return d.data.label; })
   .attr("d", arc);
+
+legend = svg.append("g")
+  .attr("class","legend")
+  .attr("transform","translate(,100)")
+  .style("font-size","12px")
+  .call(d3.legend)
 
   </script>
 </html>
