@@ -5,11 +5,6 @@
     <title>Bash Command Visualization</title>
 
     <style type="text/css">
-      #chart .label{
-          fill: #404040;
-          font-size: 12px;
-      }
-      
       .legend rect {
         fill:white;
         stroke:black;
@@ -89,25 +84,6 @@ var svg = d3.select("#chart").append("svg")
 //    return "rotate(" + (d.startAngle+d.endAngle)/2 * (180/Math.PI) + ")";
 //   });
 
-// Labels
-// var labels = svg.selectAll("text")
-//   .data(piedata)
-//   .enter()
-//   .append("text");
-
-// labels.attr("class", "label")
-//   .attr("transform", function(d) {
-//      var dist = radius + 25;
-//          angle = (d.startAngle + d.endAngle) / 2; // Middle of wedge
-//          x = dist * Math.sin(angle);
-//          y = -dist * Math.cos(angle);
-//      return "translate(" + x + "," + y + ")";
-//    })
-//   .attr("dy", "0.35em")
-//   .attr("text-anchor", "middle")
-//   .text(function(d){
-//     return d.data.label;
-//   });
 
 // Piechart
 var path = svg.selectAll("path")
@@ -117,6 +93,25 @@ var path = svg.selectAll("path")
   .attr("fill", function(d) { return d.data.colour; })
   .attr("data-legend", function(d) { return d.data.label; })
   .attr("d", arc);
+
+var labels = svg.selectAll("text")
+  .data(piedata)
+  .enter()
+  .append("text");
+
+labels.attr("class", "label")
+  .attr("transform", function(d) {
+     var dist = radius - 25;
+         angle = (d.startAngle + d.endAngle) / 2; // Middle of wedge
+         x = dist * Math.sin(angle);
+         y = -dist * Math.cos(angle);
+     return "translate(" + x + "," + y + ")";
+   })
+  .attr("dy", "0.35em")
+  .attr("text-anchor", "middle")
+  .text(function(d){
+    return d.data.count;
+});
 
 legend = svg.append("g")
   .attr("class","legend")
